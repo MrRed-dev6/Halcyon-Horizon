@@ -14,3 +14,4 @@ crate-type = ["cdylib"]
 horizon-client = { path = "../horizon-client" }
 horizon-threads = { path = "../horizon-threads" }
 winit = { version = "0.30.13", features = ["android-game-activity"] }
+libc = "0.2"
