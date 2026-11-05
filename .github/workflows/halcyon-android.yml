@@ -1,0 +1,46 @@
+name: Halcyon Android check
+
+# Проверка: собирается ли клиентская библиотека Horizon под Android (arm64).
+on:
+  workflow_dispatch:
+  push:
+    branches: ["halcyon/**"]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: android-arm64
+
+      - name: Cargo check for aarch64-linux-android
+        run: |
+          set -o pipefail
+          NDK="${ANDROID_NDK_HOME:-$ANDROID_NDK_LATEST_HOME}"
+          echo "NDK: $NDK"
+          TC="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          export CC_aarch64_linux_android="$TC/aarch64-linux-android29-clang"
+          export CXX_aarch64_linux_android="$TC/aarch64-linux-android29-clang++"
+          export AR_aarch64_linux_android="$TC/llvm-ar"
+          export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$TC/aarch64-linux-android29-clang"
+          rustc --version
+          cargo check -p horizon-client-lib --target aarch64-linux-android --keep-going --message-format short 2>&1 | tee check.log
+
+      - name: Summary of errors
+        if: always()
+        run: |
+          { echo '### Errors'; echo '```'; grep -E '(^error|: error)' check.log | head -150; echo '```'; } >> "$GITHUB_STEP_SUMMARY" || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: check-log
+          path: check.log
