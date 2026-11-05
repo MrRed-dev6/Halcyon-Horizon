@@ -9,6 +9,10 @@ license.workspace = true
 rust-version = "1.90"
 description = "Reusable client systems, control tool and parity probes"
 
+# Halcyon: the Android backend of winit needs one activity flavour picked.
+[target.'cfg(target_os = "android")'.dependencies]
+winit = { version = "0.30.13", features = ["android-game-activity"] }
+
 [lib]
 path = "../horizon-client/src/client_lib.rs"
 
