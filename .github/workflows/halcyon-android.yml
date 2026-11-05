@@ -35,7 +35,7 @@ jobs:
           export AR_aarch64_linux_android="$TC/llvm-ar"
           export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$TC/aarch64-linux-android29-clang"
           rustc --version
-          cargo check -p horizon-client-lib --target aarch64-linux-android --keep-going --message-format short 2>&1 | tee check.log
+          cargo check -p horizon-client-lib -p halcyon-android --target aarch64-linux-android --keep-going --message-format short 2>&1 | tee check.log
 
       - name: Summary of errors
         if: always()
