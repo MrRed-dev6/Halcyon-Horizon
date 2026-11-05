@@ -1,0 +1,67 @@
+name: Halcyon Android build
+
+# Сборка libhalcyon_android.so (arm64) с линковкой. Запускается вручную.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: android-arm64-fast
+
+      - name: NDK environment
+        run: |
+          NDK="${ANDROID_NDK_HOME:-$ANDROID_NDK_LATEST_HOME}"
+          TC="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          {
+            echo "TC=$TC"
+            echo "CC_aarch64_linux_android=$TC/aarch64-linux-android29-clang"
+            echo "CXX_aarch64_linux_android=$TC/aarch64-linux-android29-clang++"
+            echo "AR_aarch64_linux_android=$TC/llvm-ar"
+            echo "CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$TC/aarch64-linux-android29-clang"
+          } >> "$GITHUB_ENV"
+          echo "NDK: $NDK"
+
+      - name: Build halcyon-android
+        run: |
+          set -o pipefail
+          rustc --version
+          cargo build -p halcyon-android --target aarch64-linux-android --profile fast --keep-going --message-format short 2>&1 | tee build.log
+
+      - name: Inspect the library
+        if: always()
+        run: |
+          SO=target/aarch64-linux-android/fast/libhalcyon_android.so
+          {
+            ls -la "$SO"
+            "$TC/llvm-readelf" -h "$SO" | grep -E "Machine|Type"
+            "$TC/llvm-readelf" -d "$SO" | grep -E "NEEDED|SONAME"
+            "$TC/llvm-nm" -D "$SO" | grep -E "android_main|ANativeActivity_onCreate|GameActivity_onCreate" || true
+          } 2>&1 | tee inspect.log || true
+
+      - name: Publish logs
+        if: always()
+        run: bash .github/halcyon-publish-log.sh "${{ github.token }}" build.log inspect.log
+
+      - name: Publish the library as a prerelease asset
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SO=target/aarch64-linux-android/fast/libhalcyon_android.so
+          gh release delete android-dev -y --cleanup-tag || true
+          gh release create android-dev "$SO" --prerelease --title "Android dev build" \
+            --notes "libhalcyon_android.so (arm64), profile fast, from ${GITHUB_SHA}"

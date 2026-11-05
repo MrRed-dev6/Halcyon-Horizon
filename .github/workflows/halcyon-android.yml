@@ -44,15 +44,4 @@ jobs:
 
       - name: Publish log to the ci-logs branch
         if: always()
-        run: |
-          rm -rf /tmp/logs && mkdir /tmp/logs
-          cp check.log /tmp/logs/check.log
-          echo "run ${GITHUB_RUN_ID} on ${GITHUB_SHA}" > /tmp/logs/run.txt
-          cd /tmp/logs
-          git init -q
-          git checkout -q -b ci-logs
-          git config user.name "github-actions"
-          git config user.email "actions@users.noreply.github.com"
-          git add -A
-          git commit -q -m "log of run ${GITHUB_RUN_ID}"
-          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" ci-logs
+        run: bash .github/halcyon-publish-log.sh "${{ github.token }}" check.log
