@@ -1,8 +1,10 @@
 name: Halcyon Android build
 
-# Сборка libhalcyon_android.so (arm64) с линковкой. Запускается вручную.
+# Сборка libhalcyon_android.so (arm64) с линковкой. Запускается пушем в ветку halcyon/build* или вручную.
 on:
   workflow_dispatch:
+  push:
+    branches: ["halcyon/build*"]
 
 permissions:
   contents: write
