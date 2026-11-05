@@ -29,3 +29,17 @@ pub fn new() -> Result<EventLoop<()>, EventLoopError> {
         EventLoop::new()
     }
 }
+
+static ARGS: std::sync::OnceLock<Vec<String>> = std::sync::OnceLock::new();
+
+/// Halcyon: the command line handed over by the host app (Android has no process arguments).
+pub fn set_args(args: Vec<String>) {
+    let _ = ARGS.set(args);
+}
+
+/// The command line without the program name: the host app's, or the process's own.
+pub fn args() -> Vec<String> {
+    ARGS.get()
+        .cloned()
+        .unwrap_or_else(|| std::env::args().skip(1).collect())
+}

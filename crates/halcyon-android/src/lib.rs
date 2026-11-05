@@ -12,7 +12,16 @@ fn android_main(app: AndroidApp) {
     horizon_client::eventloop::set_android_app(app.clone());
     // The game keeps its files under the app's own folder.
     if let Some(dir) = app.internal_data_path() {
-        let _ = std::env::set_current_dir(dir);
+        let _ = std::env::set_current_dir(&dir);
+        // The host app writes the command line (one argument per line) before it starts the game.
+        if let Ok(text) = std::fs::read_to_string(dir.join("horizon-args.txt")) {
+            let args: Vec<String> = text
+                .lines()
+                .filter(|line| !line.is_empty())
+                .map(str::to_owned)
+                .collect();
+            horizon_client::eventloop::set_args(args);
+        }
     }
     horizon_client::entry::main();
 }
