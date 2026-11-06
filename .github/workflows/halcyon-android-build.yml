@@ -65,12 +65,15 @@ jobs:
         if: always()
         run: bash .github/halcyon-publish-log.sh "${{ github.token }}" build.log inspect.log
 
-      - name: Publish the library as a prerelease asset
+      - name: Publish the library as a release (one per commit)
         if: success()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           SO=target/aarch64-linux-android/fast/libhalcyon_android.so
-          gh release delete android-dev -y --cleanup-tag || true
-          gh release create android-dev "$SO" --prerelease --title "Android dev build" \
-            --notes "libhalcyon_android.so (arm64), profile fast, from ${GITHUB_SHA}"
+          SHORT="${GITHUB_SHA::7}"
+          TAG="engine-${SHORT}"
+          gh release delete "$TAG" -y --cleanup-tag || true
+          gh release create "$TAG" "$SO" --prerelease --target "$GITHUB_SHA" \
+            --title "Horizon for Android (${SHORT})" \
+            --notes "libhalcyon_android.so for arm64, build profile fast, built from ${GITHUB_SHA}. The Halcyon launcher downloads this file."
