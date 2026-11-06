@@ -52,7 +52,14 @@ jobs:
             "$TC/llvm-readelf" -h "$SO" | grep -E "Machine|Type"
             "$TC/llvm-readelf" -d "$SO" | grep -E "NEEDED|SONAME"
             "$TC/llvm-nm" -D "$SO" | grep -E "android_main|ANativeActivity_onCreate|GameActivity_onCreate" || true
+            echo "TLS relocations:"
+            "$TC/llvm-readelf" -r "$SO" | grep -E "TLS" | awk '{print $3}' | sort | uniq -c
           } 2>&1 | tee inspect.log || true
+          # Android refuses to dlopen a library with initial-exec TLS (R_AARCH64_TLS_TPREL64).
+          if "$TC/llvm-readelf" -r "$SO" | grep -q "TLS_TPREL"; then
+            echo "The library has initial-exec TLS relocations: it cannot be dlopen'ed on Android" | tee -a inspect.log
+            exit 1
+          fi
 
       - name: Publish logs
         if: always()

@@ -90,7 +90,9 @@ fn main() {
     let dynamic_tls = env::var("CARGO_FEATURE_LOCAL_DYNAMIC_TLS").is_ok();
 
     if target_family == "unix" && target_os != "haiku" {
-        if dynamic_tls {
+        // Halcyon: Android's loader rejects initial-exec TLS in a dlopen'ed library ("TLS symbol ... using
+        // IE relocation is not supported"), and GameActivity dlopens the engine: local-dynamic there.
+        if dynamic_tls || target_os == "android" {
             build.flag_if_supported("-ftls-model=local-dynamic");
         } else {
             build.flag_if_supported("-ftls-model=initial-exec");
