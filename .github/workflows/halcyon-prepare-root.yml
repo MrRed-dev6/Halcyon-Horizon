@@ -1,0 +1,88 @@
+name: Halcyon prepare root
+
+# The folder horizon-prepare runs from on Android: research-lock.json, the sources the exporters' key covers, and
+# the compiled exporters (only Horizon's own classes). Built here at the pinned base because upstream's releases
+# are of other commits, and the exporters' key follows the sources. Needs a JDK once; the phone needs a JRE.
+# Runs on a push to halcyon/prepare-root* or by hand.
+on:
+  workflow_dispatch:
+  push:
+    branches: ["halcyon/prepare-root*"]
+
+permissions:
+  contents: write
+
+jobs:
+  root:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: prepare-root
+
+      - name: Pinned Minecraft files from Mojang's public servers
+        run: python3 packaging/halcyon/fetch_mojang.py "$RUNNER_TEMP/minecraft"
+
+      - name: Build horizon-prepare
+        run: cargo build --release --locked -p horizon-prepare
+
+      - name: Prepare once, which compiles the exporters
+        run: |
+          set -o pipefail
+          V=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' research-lock.json | head -1)
+          M="$RUNNER_TEMP/minecraft"
+          target/release/horizon-prepare --prepare --root "$PWD" --minecraft-dir "$M" \
+            --server-jar "$M/versions/$V/$V-server.jar" --java-home "$JAVA_HOME" 2>&1 | tee "$RUNNER_TEMP/prepare-1.log" | tail -25
+
+      - name: Assemble the root
+        run: |
+          set -euo pipefail
+          ROOT="$RUNNER_TEMP/prepare-root"
+          rm -rf "$ROOT" && mkdir -p "$ROOT"
+          # What a release folder takes from the repository (xtask ARCHIVED), then the exporters.
+          git archive HEAD tools mods/horizon/src/test/java crates/horizon-prepare research-lock.json LICENSE | tar -x -C "$ROOT"
+          BUNDLE=$(dirname "$(find .local/exporters -maxdepth 2 -name manifest.json | head -1)")
+          echo "bundle: $BUNDLE"
+          mkdir -p "$ROOT/exporters"
+          cp -R "$BUNDLE/server" "$BUNDLE/client" "$BUNDLE/manifest.json" "$ROOT/exporters/"
+          stray=$(find "$ROOT/exporters" -type f ! -name manifest.json ! -name '*.class')
+          [ -z "$stray" ] || { echo "::error::not a class: $stray"; exit 1; }
+          (cd "$ROOT" && zip -qr "$RUNNER_TEMP/halcyon-prepare-root.zip" .)
+          ls -la "$RUNNER_TEMP/halcyon-prepare-root.zip"
+
+      - name: The bundle is used as it is (no compiling)
+        run: |
+          set -o pipefail
+          V=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' research-lock.json | head -1)
+          M="$RUNNER_TEMP/minecraft"
+          CHECK="$RUNNER_TEMP/check-root"
+          rm -rf "$CHECK" && mkdir -p "$CHECK" && unzip -q "$RUNNER_TEMP/halcyon-prepare-root.zip" -d "$CHECK"
+          target/release/horizon-prepare --launch-api --root "$CHECK" | head -c 400; echo
+          target/release/horizon-prepare --prepare --root "$CHECK" --minecraft-dir "$M" \
+            --server-jar "$M/versions/$V/$V-server.jar" --java-home "$JAVA_HOME" 2>&1 | tee "$RUNNER_TEMP/prepare-2.log" | tail -10
+          if grep -qi "compiling" "$RUNNER_TEMP/prepare-2.log"; then echo "::error::the second preparation compiled exporters"; exit 1; fi
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SHORT="${GITHUB_SHA::7}"
+          TAG="prepare-root-${SHORT}"
+          gh release delete "$TAG" -y --cleanup-tag || true
+          gh release create "$TAG" "$RUNNER_TEMP/halcyon-prepare-root.zip" --prerelease --target "$GITHUB_SHA" \
+            --title "Prepare root (${SHORT})" \
+            --notes "halcyon-prepare-root.zip: research-lock.json, the sources the exporters' key covers and Horizon's compiled exporters, built from ${GITHUB_SHA}. The Halcyon launcher downloads this file."
+
+      - name: Publish the logs
+        if: always()
+        run: bash .github/halcyon-publish-log.sh "${{ github.token }}" "$RUNNER_TEMP/prepare-1.log" "$RUNNER_TEMP/prepare-2.log"
