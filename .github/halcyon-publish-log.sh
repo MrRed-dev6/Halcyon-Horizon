@@ -10,7 +10,7 @@ if ! git clone -q --depth 1 --branch ci-logs "$URL" /tmp/logs 2>/dev/null; then
   git -C /tmp/logs init -q -b ci-logs
   git -C /tmp/logs remote add origin "$URL"
 fi
-for f in "$@"; do cp "$f" /tmp/logs/; done
+for f in "$@"; do if [ -f "$f" ]; then cp "$f" /tmp/logs/; fi; done
 NAME="${GITHUB_WORKFLOW// /-}"
 echo "run ${GITHUB_RUN_ID} on ${GITHUB_SHA} (${GITHUB_WORKFLOW})" > "/tmp/logs/run-${NAME}.txt"
 cd /tmp/logs

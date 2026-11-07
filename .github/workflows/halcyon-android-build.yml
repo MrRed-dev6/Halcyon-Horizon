@@ -43,6 +43,16 @@ jobs:
           rustc --version
           cargo build -p halcyon-android --target aarch64-linux-android --profile fast --keep-going --message-format short 2>&1 | tee build.log
 
+      - name: Build horizon-prepare and the Java launcher
+        run: |
+          set -o pipefail
+          OUT=target/aarch64-linux-android/fast
+          cargo build -p horizon-prepare --bin horizon-prepare --target aarch64-linux-android --profile fast --message-format short 2>&1 | tee prepare.log
+          # The app runs these from its native library folder, so they are named lib*.so there.
+          cp "$OUT/horizon-prepare" "$OUT/libhorizon_prepare.so"
+          "$CC_aarch64_linux_android" -O2 -fPIE -pie -o "$OUT/libhalcyon_java.so" packaging/halcyon/java_launcher.c -ldl 2>&1 | tee -a prepare.log
+          ls -la "$OUT/libhorizon_prepare.so" "$OUT/libhalcyon_java.so"
+
       - name: Inspect the library
         if: always()
         run: |
@@ -63,7 +73,7 @@ jobs:
 
       - name: Publish logs
         if: always()
-        run: bash .github/halcyon-publish-log.sh "${{ github.token }}" build.log inspect.log
+        run: bash .github/halcyon-publish-log.sh "${{ github.token }}" build.log prepare.log inspect.log
 
       - name: Publish the library as a release (one per commit)
         if: success()
@@ -74,6 +84,6 @@ jobs:
           SHORT="${GITHUB_SHA::7}"
           TAG="engine-${SHORT}"
           gh release delete "$TAG" -y --cleanup-tag || true
-          gh release create "$TAG" "$SO" --prerelease --target "$GITHUB_SHA" \
+          gh release create "$TAG" "$SO" target/aarch64-linux-android/fast/libhorizon_prepare.so target/aarch64-linux-android/fast/libhalcyon_java.so --prerelease --target "$GITHUB_SHA" \
             --title "Horizon for Android (${SHORT})" \
             --notes "libhalcyon_android.so for arm64, build profile fast, built from ${GITHUB_SHA}. The Halcyon launcher downloads this file."

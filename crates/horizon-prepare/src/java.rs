@@ -33,6 +33,16 @@ pub(crate) fn command(program: impl AsRef<OsStr>) -> Command {
         command.creation_flags(CREATE_NO_WINDOW);
         command
     };
+    // Halcyon (Android): the runtime is the launcher's own folder, and the "java" is the launcher's
+    // `libhalcyon_java.so`, which finds that runtime through this variable.
+    #[cfg(target_os = "android")]
+    let command = {
+        let mut command = command;
+        if let Some(home) = std::env::var_os("HALCYON_JRE_HOME") {
+            command.env("JAVA_HOME", home);
+        }
+        command
+    };
     command
 }
 
@@ -237,6 +247,17 @@ pub fn find_runtime(major: i64, more: &[PathBuf]) -> Result<Jdk, String> {
 }
 
 fn find_tools(major: i64, more: &[PathBuf], compiler: bool) -> Result<Jdk, String> {
+    // Halcyon (Android): the Android app hands over the Java launcher it ships (HALCYON_JAVA) and
+    // the runtime's folder (HALCYON_JRE_HOME); there is nothing to search for, and a JRE has no javac.
+    if cfg!(target_os = "android") && !compiler {
+        if let Some(java) = std::env::var_os("HALCYON_JAVA").filter(|v| !v.is_empty()) {
+            let java = PathBuf::from(java);
+            return Ok(Jdk {
+                javac: java.clone(),
+                java,
+            });
+        }
+    }
     let tool = if compiler { "javac" } else { "java" };
     let need = format!(
         "Java {major} is needed ({tool}, e.g. Eclipse Temurin {major}). \
