@@ -1,0 +1,51 @@
+Imported client 26.3 from /home/runner/work/_temp/minecraft/versions/26.3/26.3.jar
+client: 11383 classes, 98739 methods
+server: 7762 classes, 72269 methods
+Artifacts: /home/runner/work/Halcyon-Horizon/Halcyon-Horizon/.local/minecraft/26.3
+Checked the game files in 2.0 s
+Exporting block states (VanillaHeightmapOracle)
+Exporting model bindings (VanillaBlockStateBindingOracle)
+Running vanilla's data generator reports
+Copying the client's assets and data
+Compiling server exporters (shared helpers once)
+Compiling client exporters (shared helpers once)
+Panorama assets ready: 7 files, 4.1 MB
+Font assets ready: 5 files, 1.9 MB
+Built-in pack assets ready: 2 files, 0.7 MB
+Language assets ready: 143 files, 91.0 MB
+Copied the client's assets and data in 1.1 s
+Writing the world generator's bundle
+Wrote the world generator's bundle in 0.2 s
+Compiled client exporters in 4.4 s
+Compiled server exporters in 4.6 s
+Ran the data generator in 12.7 s
+Exporting the creative inventory (VanillaCreativeTabsExporter)
+Exported block states in 8.3 s
+Exporting movement and attributes (VanillaBlockLandingOracle, VanillaEntityAttributeOracle)
+Exported model bindings in 8.6 s
+Exporting entity models (VanillaEntityModelExporter)
+Exported entity models in 0.3 s
+Exporting mob data (VanillaMobDataExporter)
+Exported mob data in 0.3 s
+Exporting command registries (VanillaCommandParseOracle)
+Exported movement and attributes in 6.1 s
+Exporting damage and health (VanillaPlayerHealthOracle, VanillaDamageSourceOracle)
+Exported damage and health in 0.1 s
+Exporting collision shapes (VanillaCollisionOracle)
+Exported collision shapes in 0.0 s
+Exporting face visibility (VanillaFaceVisibilityOracle)
+Exported the creative inventory in 8.6 s
+Exported face visibility in 1.9 s
+Exporting gameplay facts (VanillaGameplayFactsExporter)
+Exported command registries in 9.4 s
+Exported gameplay facts in 2.8 s
+Exporting entity types (VanillaEntityTypesExporter)
+Exported entity types in 0.0 s
+Exporting block behaviours (VanillaBlockBehaviourExporter)
+Exported block behaviours in 0.1 s
+Exporting block behavior (VanillaSimpleBlockOracle)
+Exported block behavior in 3.8 s
+Exporting structure blocks (VanillaStructureBlockExporter)
+Exported structure blocks in 0.1 s
+Prepared Horizon native-client resources: /home/runner/work/Halcyon-Horizon/Halcyon-Horizon/.local/horizon-client/26.3
+Done in 31.1 s
