@@ -11,6 +11,9 @@ use std::{
 
 /// MinecraftServicesEnvironment.PROD.
 pub const DEFAULT_DISCOVERY: &str = "https://discovery.minecraftservices.com/minecraft/client";
+/// Halcyon: where an Ely.by account tells the session service it is joining a server (the same
+/// request body as Mojang's join).
+pub const ELY_SESSION_JOIN: &str = "https://authserver.ely.by/session/join";
 /// A session file older than this is refused: it can't be replayed later.
 const MAX_SESSION_FILE_AGE: Duration = Duration::from_secs(120);
 
@@ -19,6 +22,9 @@ pub struct AuthSession {
     pub name: String,
     pub uuid: u128,
     pub xuid: Option<String>,
+    /// Halcyon: an Ely.by account (`user_type` "ely"). It joins servers through Ely.by's session
+    /// service, and its token is never sent to Mojang's services.
+    pub ely: bool,
     access_token: String,
 }
 impl std::fmt::Debug for AuthSession {
@@ -46,6 +52,7 @@ impl AuthSession {
             name: name.to_owned(),
             uuid,
             xuid: None,
+            ely: false,
             access_token: access_token.to_owned(),
         }
     }
@@ -68,13 +75,16 @@ impl AuthSession {
         let access_token = field("access_token")
             .filter(|t| !t.is_empty())
             .ok_or("the session has no access token")?;
-        if field("user_type").is_some_and(|t| t != "msa") {
-            return Err("the session is not a Microsoft account session".into());
-        }
+        let ely = match field("user_type") {
+            None | Some("msa") => false,
+            Some("ely") => true,
+            Some(_) => return Err("the session is not a Microsoft or an Ely.by account session".into()),
+        };
         Ok(Self {
             name: name.to_owned(),
             uuid,
             xuid: field("xuid").map(str::to_owned),
+            ely,
             access_token: access_token.to_owned(),
         })
     }
@@ -231,6 +241,10 @@ pub fn endpoint(doc: &serde_json::Value, service: &str, name: &str) -> Option<St
 /// to no actions, as vanilla does. Blocks: call it off the main thread.
 pub fn fetch_account_status(session: &AuthSession) -> crate::ban_notice::AccountStatus {
     use crate::ban_notice::{AccountStatus, parse_profile_actions, parse_properties};
+    // Mojang's services know nothing of an Ely.by account, and must not get its token.
+    if session.ely {
+        return AccountStatus::default();
+    }
     let Ok(doc) = discovery() else {
         return AccountStatus::default();
     };
@@ -301,8 +315,12 @@ pub fn join_server(session: &AuthSession, server_hash: &str) -> Result<(), JoinE
 }
 
 fn join_server_once(session: &AuthSession, server_hash: &str) -> Result<(), JoinError> {
-    let doc = discovery()?;
-    let url = endpoint(&doc, "session", "join").ok_or(JoinError::Unavailable)?;
+    let url = if session.ely {
+        ELY_SESSION_JOIN.to_owned()
+    } else {
+        let doc = discovery()?;
+        endpoint(&doc, "session", "join").ok_or(JoinError::Unavailable)?
+    };
     match agent()
         .post(&url)
         .set("Content-Type", "application/json; charset=utf-8")

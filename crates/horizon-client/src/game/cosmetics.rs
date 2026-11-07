@@ -89,6 +89,10 @@ fn account() -> Option<(
     std::path::PathBuf,
 )> {
     let session = horizon_client::auth::current()?;
+    // Mojang's cosmetics service knows no Ely.by account, and must not get its token.
+    if session.ely {
+        return None;
+    }
     let uuid = format!("{:032x}", session.uuid);
     Some((session, uuid, std::env::current_dir().ok()?))
 }
