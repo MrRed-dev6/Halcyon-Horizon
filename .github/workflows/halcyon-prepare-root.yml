@@ -36,7 +36,7 @@ jobs:
       - name: Build horizon-prepare
         run: |
           set -o pipefail
-          cargo build --release --locked -p horizon-prepare --message-format short 2>&1 | tee "$RUNNER_TEMP/prepare-build.log"
+          cargo build --release -p horizon-prepare --message-format short 2>&1 | tee "$RUNNER_TEMP/prepare-build.log"
 
       - name: Prepare once, which compiles the exporters
         run: |
