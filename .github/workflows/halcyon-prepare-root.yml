@@ -34,7 +34,9 @@ jobs:
         run: python3 packaging/halcyon/fetch_mojang.py "$RUNNER_TEMP/minecraft"
 
       - name: Build horizon-prepare
-        run: cargo build --release --locked -p horizon-prepare
+        run: |
+          set -o pipefail
+          cargo build --release --locked -p horizon-prepare --message-format short 2>&1 | tee "$RUNNER_TEMP/prepare-build.log"
 
       - name: Prepare once, which compiles the exporters
         run: |
@@ -85,4 +87,4 @@ jobs:
 
       - name: Publish the logs
         if: always()
-        run: bash .github/halcyon-publish-log.sh "${{ github.token }}" "$RUNNER_TEMP/prepare-1.log" "$RUNNER_TEMP/prepare-2.log"
+        run: bash .github/halcyon-publish-log.sh "${{ github.token }}" "$RUNNER_TEMP/prepare-build.log" "$RUNNER_TEMP/prepare-1.log" "$RUNNER_TEMP/prepare-2.log"
