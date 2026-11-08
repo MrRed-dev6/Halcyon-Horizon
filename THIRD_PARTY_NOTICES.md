@@ -170,3 +170,9 @@ BlueMap is licensed under the MIT license:
 > LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 > OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 > THE SOFTWARE.
+
+## android-activity (Halcyon, Android)
+
+`third_party/android-activity` is android-activity 0.6.1 (MIT or Apache-2.0, by the rust-mobile developers) with one change: the
+thread that runs `android_main` is created with a 64 MiB stack instead of Bionic's 1 MiB default, because the game's menus overflowed
+it. Unmodified otherwise.

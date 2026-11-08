@@ -13,11 +13,6 @@ use winit::platform::android::activity::AndroidApp;
 #[global_allocator]
 static ALLOCATOR: horizon_threads::Allocator = horizon_threads::ALLOCATOR;
 
-/// The game's stack. Android starts the `android_main` thread with Bionic's 1 MiB; a Linux main thread
-/// has 8 MiB, and the menus overflowed 1 MiB a few seconds after the logo ("stack pointer is not in a
-/// rw map"). Only the pages the game touches are ever committed.
-const GAME_STACK: usize = 64 * 1024 * 1024;
-
 static LOG_DIR: OnceLock<PathBuf> = OnceLock::new();
 
 fn note(dir: &Path, text: &str) {
@@ -72,9 +67,7 @@ fn android_main(app: AndroidApp) {
         }
         note(&dir, "entering the game");
     }
-    // The same thread on a large stack of its own: the event loop polls this thread's looper, so the
-    // game cannot move to another thread.
-    stacker::grow(GAME_STACK, horizon_client::entry::main);
+    horizon_client::entry::main();
     if let Some(dir) = LOG_DIR.get() {
         note(dir, "the game returned");
     }
