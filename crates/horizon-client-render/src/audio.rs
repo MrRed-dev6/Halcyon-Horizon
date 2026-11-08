@@ -686,8 +686,23 @@ fn output_disabled(var: impl Fn(&str) -> Option<std::ffi::OsString>) -> Option<S
 }
 /// An output stream on `device` in its default configuration, whatever its
 /// sample format: the mixer works in f32 and converts.
+/// Halcyon (Android): `cpal` unwraps its JNI calls (the AAudio host asks `AudioTrack` for buffer sizes), so
+/// a failing call is a panic, and a panic on the game's thread brings the whole app down. Here it is an
+/// error like any other that keeps a device from opening: the game goes on, with another device or
+/// without sound, and the log keeps the panic's message and stack.
 #[cfg(feature = "audio")]
 fn open_device(
+    device: &cpal::Device,
+    mixer: Arc<Mutex<Mixer>>,
+) -> Result<(cpal::Stream, cpal::SupportedStreamConfig)> {
+    match crate::crash::contain(|| open_device_unchecked(device, mixer)) {
+        Ok(result) => result,
+        Err(message) => Err(format!("the audio backend panicked: {message}").into()),
+    }
+}
+
+#[cfg(feature = "audio")]
+fn open_device_unchecked(
     device: &cpal::Device,
     mixer: Arc<Mutex<Mixer>>,
 ) -> Result<(cpal::Stream, cpal::SupportedStreamConfig)> {
