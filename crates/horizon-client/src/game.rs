@@ -17375,6 +17375,18 @@ impl ApplicationHandler for Game<'_> {
         self.previous = Instant::now();
     }
     fn window_event(&mut self, event_loop: &ActiveEventLoop, id: WindowId, event: WindowEvent) {
+        // Halcyon (Android): in the menus a finger is the mouse (touch.rs). In the world it is not, yet.
+        if let WindowEvent::Touch(_) = &event
+            && self.screen != Screen::Playing
+            && let Some(window) = self.window.clone()
+        {
+            let size = window.inner_size();
+            let pixel = crate::touch::gui_pixel(size.width, size.height);
+            for mouse in crate::touch::translate(event, window.scale_factor(), pixel) {
+                self.window_event(event_loop, id, mouse);
+            }
+            return;
+        }
         let key = if self.window.as_ref().is_some_and(|w| w.id() == id)
             && let WindowEvent::KeyboardInput {
                 event,
@@ -21451,6 +21463,17 @@ impl Loading {
     }
     fn window_event(&mut self, event_loop: &ActiveEventLoop, id: WindowId, mut event: WindowEvent) {
         if self.window.as_ref().is_none_or(|w| w.id() != id) {
+            return;
+        }
+        // Halcyon (Android): a finger is the mouse in the menus (touch.rs).
+        if let WindowEvent::Touch(_) = &event
+            && let Some(window) = self.window.clone()
+        {
+            let size = window.inner_size();
+            let pixel = crate::touch::gui_pixel(size.width, size.height);
+            for mouse in crate::touch::translate(event, window.scale_factor(), pixel) {
+                self.window_event(event_loop, id, mouse);
+            }
             return;
         }
         follow_keymap(&mut event);

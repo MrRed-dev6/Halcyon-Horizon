@@ -8,3 +8,4 @@ pub mod entry;
 pub mod eventloop;
 pub mod game;
 pub mod mod_api;
+pub mod touch;

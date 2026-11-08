@@ -129,6 +129,15 @@ impl ApplicationHandler for Missing {
         let Some(window) = self.window.clone().filter(|w| w.id() == id) else {
             return;
         };
+        // Halcyon (Android): a finger is the mouse (touch.rs).
+        if let WindowEvent::Touch(_) = &event {
+            let size = window.inner_size();
+            let pixel = crate::touch::gui_pixel(size.width, size.height);
+            for mouse in crate::touch::translate(event, window.scale_factor(), pixel) {
+                self.window_event(event_loop, id, mouse);
+            }
+            return;
+        }
         match event {
             WindowEvent::CloseRequested => event_loop.exit(),
             WindowEvent::Resized(size) => {
