@@ -5,7 +5,10 @@
 //! moved. Only the first finger counts. [`translate`] turns winit's `Touch` events into the mouse events the
 //! screens already understand and hands every other event back as it came.
 
-use std::sync::{Mutex, atomic::Ordering};
+use std::sync::{
+    Mutex,
+    atomic::{AtomicU32, Ordering},
+};
 
 use winit::dpi::PhysicalPosition;
 use winit::event::{ElementState, MouseButton, MouseScrollDelta, Touch, TouchPhase, WindowEvent};
@@ -28,6 +31,10 @@ struct Finger {
 }
 
 static FINGER: Mutex<Option<Finger>> = Mutex::new(None);
+
+/// The first touch events are logged ("Horizon touch: ..."), to see what a finger turned into.
+static LOGGED: AtomicU32 = AtomicU32::new(0);
+const LOG_LIMIT: u32 = 60;
 
 /// A finger that moves less than this (in device-independent pixels) still taps.
 const SLOP_DP: f64 = 10.0;
@@ -65,6 +72,7 @@ pub fn translate(event: WindowEvent, scale_factor: f64, gui_pixel: f64) -> Vec<W
     };
     let mut slot = FINGER.lock().unwrap_or_else(|e| e.into_inner());
     let mut out = Vec::new();
+    let log_it = LOGGED.fetch_add(1, Ordering::Relaxed) < LOG_LIMIT;
     match phase {
         TouchPhase::Started => {
             if slot.is_none() {
@@ -124,6 +132,20 @@ pub fn translate(event: WindowEvent, scale_factor: f64, gui_pixel: f64) -> Vec<W
                 }
             }
         }
+    }
+    if log_it {
+        log::info!(
+            "Horizon touch: {phase:?} at ({:.0}, {:.0}) finger {id}, mode {}, {} mouse events",
+            location.x,
+            location.y,
+            match slot.as_ref().map(|f| f.mode) {
+                Some(Mode::Drag) => "drag",
+                Some(Mode::Scroll) => "scroll",
+                Some(Mode::Undecided) => "undecided",
+                None => "none",
+            },
+            out.len()
+        );
     }
     out
 }

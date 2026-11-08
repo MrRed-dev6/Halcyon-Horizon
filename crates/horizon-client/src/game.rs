@@ -21687,6 +21687,13 @@ impl ApplicationHandler for App {
         }
     }
     fn window_event(&mut self, event_loop: &ActiveEventLoop, id: WindowId, event: WindowEvent) {
+        if cfg!(target_os = "android") {
+            if matches!(event, WindowEvent::RedrawRequested) {
+                crate::frame_stats::tick();
+            } else if !matches!(event, WindowEvent::KeyboardInput { .. }) {
+                crate::frame_stats::note_event(&event);
+            }
+        }
         match self {
             App::Loading(loading) => loading.window_event(event_loop, id, event),
             App::Ready(game) => game.window_event(event_loop, id, event),
