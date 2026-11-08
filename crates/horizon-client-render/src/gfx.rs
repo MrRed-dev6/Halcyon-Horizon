@@ -2495,7 +2495,12 @@ impl Renderer {
                 .map(|renderer| renderer.config.present_mode)
                 .filter(|mode| caps.present_modes.contains(mode))
                 .unwrap_or_else(|| {
-                    if caps.present_modes.contains(&wgpu::PresentMode::Mailbox) {
+                    // Halcyon (Android): Mailbox draws as fast as the GPU can with no vsync, which heats a
+                    // phone and makes the title panorama stutter; Fifo is vsync. (The VSync option
+                    // chooses afterwards, as in vanilla.)
+                    if !cfg!(target_os = "android")
+                        && caps.present_modes.contains(&wgpu::PresentMode::Mailbox)
+                    {
                         wgpu::PresentMode::Mailbox
                     } else {
                         wgpu::PresentMode::Fifo
