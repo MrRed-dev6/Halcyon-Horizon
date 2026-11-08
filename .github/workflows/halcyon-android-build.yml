@@ -85,11 +85,13 @@ jobs:
           TAG="engine-${SHORT}"
           # Much less to download: no debug info, then gzip (the launcher takes the .gz and unpacks it).
           ls -la "$SO"
+          # The unstripped library, gzipped, for reading crash reports with symbols.
+          gzip -9 -c "$SO" > target/aarch64-linux-android/fast/libhalcyon_android.unstripped.so.gz
           "$TC/llvm-strip" --strip-unneeded "$SO"
           "$TC/llvm-nm" -D "$SO" | grep -q android_main || { echo "::error::android_main is gone after strip"; exit 1; }
           gzip -9 -k -f "$SO"
           ls -la "$SO" "$SO.gz"
           gh release delete "$TAG" -y --cleanup-tag || true
-          gh release create "$TAG" "$SO" "$SO.gz" target/aarch64-linux-android/fast/libhorizon_prepare.so target/aarch64-linux-android/fast/libhalcyon_java.so --prerelease --target "$GITHUB_SHA" \
+          gh release create "$TAG" "$SO" "$SO.gz" target/aarch64-linux-android/fast/libhalcyon_android.unstripped.so.gz target/aarch64-linux-android/fast/libhorizon_prepare.so target/aarch64-linux-android/fast/libhalcyon_java.so --prerelease --target "$GITHUB_SHA" \
             --title "Horizon for Android (${SHORT})" \
             --notes "libhalcyon_android.so for arm64, build profile fast, built from ${GITHUB_SHA}. The Halcyon launcher downloads this file."
