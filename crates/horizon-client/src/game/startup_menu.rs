@@ -962,6 +962,25 @@ impl Loading {
         {
             return Ok(());
         }
+        // Halcyon (Android): which state a mouse press (a tap) finds the menu in, when it does not reach a screen.
+        if let WindowEvent::MouseInput {
+            state: ElementState::Pressed,
+            button: MouseButton::Left,
+            ..
+        } = &event
+        {
+            static PRESSES: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+            if PRESSES.fetch_add(1, std::sync::atomic::Ordering::Relaxed) < 30 {
+                log::info!(
+                    "Horizon touch: menu press, gui {}, pending {}, win {}, options open {}, title {}",
+                    self.gui.is_some(),
+                    self.menu.pending.is_some(),
+                    self.menu.win.is_some(),
+                    self.menu.options_open,
+                    self.menu.title.is_some()
+                );
+            }
+        }
         match event {
             WindowEvent::CloseRequested => {
                 if !self.settings.quit_shortcuts
@@ -1065,11 +1084,26 @@ impl Loading {
                         title.release();
                         title.release_field();
                     } else {
-                        let (action, _) = title.click(
+                        let (action, sounded) = title.click(
                             self.menu.cursor.0,
                             self.menu.cursor.1,
                             (batch.width, batch.height),
                         );
+                        // Halcyon (Android): what a click turned into, to find why a tap does nothing.
+                        {
+                            static CLICKS: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+                            if CLICKS.fetch_add(1, std::sync::atomic::Ordering::Relaxed) < 30 {
+                                log::info!(
+                                    "Horizon touch: menu click at ({:.0}, {:.0}) gui of {:.0}x{:.0}, action none {}, sound {}",
+                                    self.menu.cursor.0,
+                                    self.menu.cursor.1,
+                                    batch.width,
+                                    batch.height,
+                                    matches!(action, Action::None),
+                                    sounded
+                                );
+                            }
+                        }
                         title.press_field(
                             &gui.atlas,
                             self.menu.cursor,
