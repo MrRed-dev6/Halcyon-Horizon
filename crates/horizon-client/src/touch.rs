@@ -149,11 +149,3 @@ pub fn translate(event: WindowEvent, scale_factor: f64, gui_pixel: f64) -> Vec<W
     }
     out
 }
-
-/// Where a touch got to on its way to [`translate`] (the first few are logged), to find where it is lost.
-pub fn note(place: &str, detail: &str) {
-    static NOTED: AtomicU32 = AtomicU32::new(0);
-    if NOTED.fetch_add(1, Ordering::Relaxed) < 40 {
-        log::info!("Horizon touch: at {place}: {detail}");
-    }
-}

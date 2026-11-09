@@ -17375,12 +17375,10 @@ impl ApplicationHandler for Game<'_> {
         self.previous = Instant::now();
     }
     fn window_event(&mut self, event_loop: &ActiveEventLoop, id: WindowId, event: WindowEvent) {
-        if let WindowEvent::Touch(_) = &event {
-            crate::touch::note("game", &format!("screen playing {}", self.screen == Screen::Playing));
-        }
         // Halcyon (Android): in the menus a finger is the mouse (touch.rs). In the world it is not, yet.
+        // The title menu is `Screen::Playing` with `self.title` set, so both count as a menu.
         if let WindowEvent::Touch(_) = &event
-            && self.screen != Screen::Playing
+            && (self.screen != Screen::Playing || self.title.is_some())
             && let Some(window) = self.window.clone()
         {
             let size = window.inner_size();
@@ -21465,12 +21463,6 @@ impl Loading {
         self.window = Some(window);
     }
     fn window_event(&mut self, event_loop: &ActiveEventLoop, id: WindowId, mut event: WindowEvent) {
-        if let WindowEvent::Touch(_) = &event {
-            crate::touch::note(
-                "loading",
-                &format!("window {}, same id {}", self.window.is_some(), self.window.as_ref().is_some_and(|w| w.id() == id)),
-            );
-        }
         if self.window.as_ref().is_none_or(|w| w.id() != id) {
             return;
         }
@@ -21702,9 +21694,6 @@ impl ApplicationHandler for App {
             } else if !matches!(event, WindowEvent::KeyboardInput { .. }) {
                 crate::frame_stats::note_event(&event);
             }
-        }
-        if let WindowEvent::Touch(_) = &event {
-            crate::touch::note("app", if matches!(self, App::Loading(_)) { "loading" } else { "ready" });
         }
         match self {
             App::Loading(loading) => loading.window_event(event_loop, id, event),
