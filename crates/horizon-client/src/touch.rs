@@ -52,7 +52,11 @@ pub fn gui_pixel(width: u32, height: u32) -> f64 {
 }
 
 /// The mouse events for a touch event, or the event itself when it is not one.
-pub fn translate(event: WindowEvent, scale_factor: f64, gui_pixel: f64) -> Vec<WindowEvent> {
+///
+/// `holds` is whether a sideways drag may hold the left button (a slider follows the finger). The inventory
+/// and the creative menu pass false: items move by taps, as on Bedrock (tap the item, tap where it goes), and
+/// a drag there only scrolls, so it never picks anything up.
+pub fn translate(event: WindowEvent, scale_factor: f64, gui_pixel: f64, holds: bool) -> Vec<WindowEvent> {
     let touch = match event {
         WindowEvent::Touch(touch) => touch,
         other => return vec![other],
@@ -90,7 +94,7 @@ pub fn translate(event: WindowEvent, scale_factor: f64, gui_pixel: f64) -> Vec<W
                 if finger.mode == Mode::Undecided {
                     let (dx, dy) = (location.x - finger.start.x, location.y - finger.start.y);
                     if dx.hypot(dy) >= SLOP_DP * scale_factor {
-                        if dx.abs() > dy.abs() {
+                        if holds && dx.abs() > dy.abs() {
                             finger.mode = Mode::Drag;
                             out.push(moved(finger.start));
                             out.push(button(ElementState::Pressed));

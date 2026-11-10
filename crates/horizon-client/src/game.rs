@@ -17382,8 +17382,10 @@ impl ApplicationHandler for Game<'_> {
             && let Some(window) = self.window.clone()
         {
             let size = window.inner_size();
+            // Items move by taps in the inventory and the creative menu: a drag there only scrolls.
+            let holds = !matches!(self.screen, Screen::Inventory | Screen::Creative);
             let pixel = crate::touch::gui_pixel(size.width, size.height);
-            for mouse in crate::touch::translate(event, window.scale_factor(), pixel) {
+            for mouse in crate::touch::translate(event, window.scale_factor(), pixel, holds) {
                 self.window_event(event_loop, id, mouse);
             }
             return;
@@ -21511,7 +21513,7 @@ impl Loading {
         {
             let size = window.inner_size();
             let pixel = crate::touch::gui_pixel(size.width, size.height);
-            for mouse in crate::touch::translate(event, window.scale_factor(), pixel) {
+            for mouse in crate::touch::translate(event, window.scale_factor(), pixel, true) {
                 self.window_event(event_loop, id, mouse);
             }
             return;
