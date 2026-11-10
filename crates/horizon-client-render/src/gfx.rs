@@ -1050,6 +1050,12 @@ pub struct Renderer {
     pub last_wait: std::time::Duration,
     /// CPU time of the last `render`, waits excluded.
     pub last_encode: std::time::Duration,
+    /// Where `last_wait` went: waiting for the previous frame's submission, for the
+    /// queue's own writes, and for a swapchain image. A frame that is slow and spent
+    /// it here is waiting for the GPU or the display, not working.
+    pub wait_landed: std::time::Duration,
+    pub wait_queued: std::time::Duration,
+    pub wait_acquire: std::time::Duration,
     /// What the system says about the window's display, watched only while HDR output
     /// is on; before `window`, so it's dropped first.
     display: DisplayWatch,
@@ -4489,6 +4495,9 @@ impl Renderer {
             lightmap_pixels: [0; 16 * 16 * 4],
             last_wait: std::time::Duration::ZERO,
             last_encode: std::time::Duration::ZERO,
+            wait_landed: std::time::Duration::ZERO,
+            wait_queued: std::time::Duration::ZERO,
+            wait_acquire: std::time::Duration::ZERO,
             window,
             device,
             reuse,
@@ -7053,6 +7062,9 @@ impl Renderer {
         } else {
             self.surface.as_ref().map(|s| s.get_current_texture())
         };
+        self.wait_landed = landed;
+        self.wait_queued = queued;
+        self.wait_acquire = acquire.elapsed();
         self.last_wait = landed + queued + acquire.elapsed();
         // Inside the acquire's time already.
         self.queue.take_waited();
