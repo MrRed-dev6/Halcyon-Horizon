@@ -19,7 +19,10 @@ pub fn wanted() -> bool {
     match std::env::var("HORIZON_SUBMIT_THREAD").as_deref() {
         Ok("0") => false,
         Ok("1") => true,
-        _ => cfg!(target_os = "linux"),
+        // Android is the same Vulkan path as Linux, and a phone's window thread is the one that
+        // must not spend its frame waiting: finishing and submitting the commands there cost
+        // 65-70 ms on each frame that fell behind, measured on a Snapdragon 778G.
+        _ => cfg!(any(target_os = "linux", target_os = "android")),
     }
 }
 
