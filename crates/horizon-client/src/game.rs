@@ -18817,7 +18817,9 @@ impl Game<'_> {
                                 .last()
                                 .map_or_else(String::new, |ms| format!(", gpu {ms:.1} ms"));
                             log::info!(
-                                "Horizon: slow frame {cpu:.1} ms{worked}{gpu}{gap} ({steps} ticks): {}{waited}",
+                                // The waits come before the spans: a report cuts a long line short, and
+                                // these are the numbers the next fix is read from.
+                                "Horizon: slow frame {cpu:.1} ms{gpu}{waited}{worked}{gap} ({steps} ticks): {}",
                                 horizon_client::spans::describe(&spans)
                             );
                         }
