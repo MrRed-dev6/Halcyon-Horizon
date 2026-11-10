@@ -133,7 +133,7 @@ impl ApplicationHandler for Missing {
         if let WindowEvent::Touch(_) = &event {
             let size = window.inner_size();
             let pixel = crate::touch::gui_pixel(size.width, size.height);
-            for mouse in crate::touch::translate(event, window.scale_factor(), pixel) {
+            for mouse in crate::touch::translate(event, window.scale_factor(), pixel, true) {
                 self.window_event(event_loop, id, mouse);
             }
             return;
