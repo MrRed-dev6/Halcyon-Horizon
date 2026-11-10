@@ -769,6 +769,22 @@ impl Graphics {
         let mut g: Self = fs::read_to_string(dir.join(FILE))
             .map(|t| Self::parse(&t))
             .unwrap_or_default();
+        // Halcyon (Android): a phone's GPU is the limit long before a desktop's, and these three skip
+        // only what opaque blocks hide - an entity behind a hill, a particle outside the view, a leaf
+        // face that shows through two cutout layers. None of them reaches the screen either way, so
+        // the picture is the same and the frame has less of it to draw. The game's Graphics page can
+        // still turn each of them off; the file then says so and this leaves it alone for that run.
+        if cfg!(target_os = "android") {
+            if g.entity_culling == EntityCullingMode::Off {
+                g.entity_culling = EntityCullingMode::Asynchronous;
+            }
+            if g.particle_culling == ParticleCullingMode::Off {
+                g.particle_culling = ParticleCullingMode::Asynchronous;
+            }
+            if g.leaf_culling == LeafCullingMode::Off {
+                g.leaf_culling = LeafCullingMode::Hidden;
+            }
+        }
         g.blue_map.servers = match fs::read_to_string(dir.join(crate::bluemap::SERVERS_FILE)) {
             Ok(text) => crate::bluemap::Settings::parse_servers(&text),
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => Vec::new(),
