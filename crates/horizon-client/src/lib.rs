@@ -10,3 +10,4 @@ pub mod frame_stats;
 pub mod game;
 pub mod mod_api;
 pub mod touch;
+pub mod touch_input;

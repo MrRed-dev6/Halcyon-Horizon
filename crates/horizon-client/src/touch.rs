@@ -149,3 +149,56 @@ pub fn translate(event: WindowEvent, scale_factor: f64, gui_pixel: f64) -> Vec<W
     }
     out
 }
+
+/// What a finger does in the world (not in a menu): the first one that lands outside the hotbar turns the
+/// view, a tap on a hotbar slot picks it. The on-screen buttons are the launcher's, they never get here.
+pub enum World {
+    Nothing,
+    /// A hotbar slot, 0 to 8.
+    Hotbar(usize),
+    /// The view turns by this much, in pixels, as a mouse's motion would.
+    Look(f64, f64),
+}
+
+static LOOK: Mutex<Option<(u64, PhysicalPosition<f64>)>> = Mutex::new(None);
+
+/// The hotbar slot under a finger, if it is on the hotbar (a little taller than it is drawn).
+fn hotbar_slot(position: PhysicalPosition<f64>, width: u32, height: u32) -> Option<usize> {
+    let pixel = gui_pixel(width, height);
+    let (x, y) = (position.x / pixel, position.y / pixel);
+    let (w, h) = (f64::from(width) / pixel, f64::from(height) / pixel);
+    let left = w / 2.0 - 91.0;
+    if y < h - 30.0 || x < left || x >= left + 182.0 {
+        return None;
+    }
+    Some((((x - left - 3.0) / 20.0).floor().max(0.0) as usize).min(8))
+}
+
+pub fn world(touch: &Touch, width: u32, height: u32) -> World {
+    let mut look = LOOK.lock().unwrap_or_else(|e| e.into_inner());
+    match touch.phase {
+        TouchPhase::Started => {
+            if let Some(slot) = hotbar_slot(touch.location, width, height) {
+                return World::Hotbar(slot);
+            }
+            if look.is_none() {
+                *look = Some((touch.id, touch.location));
+            }
+            World::Nothing
+        }
+        TouchPhase::Moved => match look.as_mut() {
+            Some((id, last)) if *id == touch.id => {
+                let delta = World::Look(touch.location.x - last.x, touch.location.y - last.y);
+                *last = touch.location;
+                delta
+            }
+            _ => World::Nothing,
+        },
+        TouchPhase::Ended | TouchPhase::Cancelled => {
+            if look.as_ref().is_some_and(|(id, _)| *id == touch.id) {
+                *look = None;
+            }
+            World::Nothing
+        }
+    }
+}

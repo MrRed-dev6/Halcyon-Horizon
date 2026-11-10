@@ -191,6 +191,21 @@ impl Game<'_> {
                 break;
             }
         }
+        // Halcyon (Android): the on-screen controls' input, and where the game is, for the overlay.
+        for line in crate::touch_input::drain() {
+            let (reply, _) = std::sync::mpsc::channel();
+            let _ = self.control_command(&line, &reply, event_loop);
+        }
+        crate::touch_input::STATE.store(
+            if self.title.is_some() {
+                0
+            } else if self.screen == Screen::Playing {
+                1
+            } else {
+                2
+            },
+            std::sync::atomic::Ordering::Relaxed,
+        );
         // A recording made from the F3 keys or the Settings page has no socket,
         // and still wants its events.
         if self.control.is_some() || self.repro.recording_active() {

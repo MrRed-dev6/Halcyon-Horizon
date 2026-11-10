@@ -72,3 +72,26 @@ fn android_main(app: AndroidApp) {
         note(dir, "the game returned");
     }
 }
+
+/// The launcher's on-screen controls send their input here (`HorizonActivity.nativeInput`): plain numbers
+/// only, see `horizon_client::touch_input`.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_dev_halcyon_launcher_game_HorizonActivity_nativeInput(
+    _env: *mut std::ffi::c_void,
+    _this: *mut std::ffi::c_void,
+    kind: i32,
+    code: i32,
+    x: f32,
+    y: f32,
+) {
+    horizon_client::touch_input::push(kind, code, x, y);
+}
+
+/// Where the game is: 0 the title menu or loading, 1 playing, 2 a screen (`HorizonActivity.nativeState`).
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_dev_halcyon_launcher_game_HorizonActivity_nativeState(
+    _env: *mut std::ffi::c_void,
+    _this: *mut std::ffi::c_void,
+) -> i32 {
+    horizon_client::touch_input::STATE.load(std::sync::atomic::Ordering::Relaxed)
+}

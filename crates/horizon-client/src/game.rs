@@ -17388,6 +17388,23 @@ impl ApplicationHandler for Game<'_> {
             }
             return;
         }
+        // Halcyon (Android): in the world a finger turns the view, and a tap on the hotbar picks its slot.
+        if let WindowEvent::Touch(touch) = &event
+            && self.screen == Screen::Playing
+            && self.title.is_none()
+            && let Some(window) = self.window.clone()
+        {
+            let size = window.inner_size();
+            match crate::touch::world(touch, size.width, size.height) {
+                crate::touch::World::Hotbar(slot) => self.selected = slot,
+                crate::touch::World::Look(dx, dy) => {
+                    self.mouse.on_move(0.0, 0.0, dx, dy, true, true);
+                    self.last_input = Instant::now();
+                }
+                crate::touch::World::Nothing => {}
+            }
+            return;
+        }
         let key = if self.window.as_ref().is_some_and(|w| w.id() == id)
             && let WindowEvent::KeyboardInput {
                 event,
