@@ -1,4 +1,4 @@
--rwxr-xr-x 2 runner runner 94363688 Nov 10 03:51 target/aarch64-linux-android/fast/libhalcyon_android.so
+-rwxr-xr-x 2 runner runner 94363448 Nov 10 03:52 target/aarch64-linux-android/fast/libhalcyon_android.so
   Type:                              DYN (Shared object file)
   Machine:                           AArch64
   0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
