@@ -22,7 +22,7 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          key: android-arm64-fast
+          key: android-arm64-release
 
       - name: NDK environment
         run: |
@@ -41,13 +41,13 @@ jobs:
         run: |
           set -o pipefail
           rustc --version
-          cargo build -p halcyon-android --target aarch64-linux-android --profile fast --keep-going --message-format short 2>&1 | tee build.log
+          cargo build -p halcyon-android --target aarch64-linux-android --profile release --keep-going --message-format short 2>&1 | tee build.log
 
       - name: Build horizon-prepare and the Java launcher
         run: |
           set -o pipefail
-          OUT=target/aarch64-linux-android/fast
-          cargo build -p horizon-prepare --bin horizon-prepare --target aarch64-linux-android --profile fast --message-format short 2>&1 | tee prepare.log
+          OUT=target/aarch64-linux-android/release
+          cargo build -p horizon-prepare --bin horizon-prepare --target aarch64-linux-android --profile release --message-format short 2>&1 | tee prepare.log
           # The app runs these from its native library folder, so they are named lib*.so there.
           cp "$OUT/horizon-prepare" "$OUT/libhorizon_prepare.so"
           "$CC_aarch64_linux_android" -O2 -fPIE -pie -o "$OUT/libhalcyon_java.so" packaging/halcyon/java_launcher.c -ldl 2>&1 | tee -a prepare.log
@@ -56,7 +56,7 @@ jobs:
       - name: Inspect the library
         if: always()
         run: |
-          SO=target/aarch64-linux-android/fast/libhalcyon_android.so
+          SO=target/aarch64-linux-android/release/libhalcyon_android.so
           {
             ls -la "$SO"
             "$TC/llvm-readelf" -h "$SO" | grep -E "Machine|Type"
@@ -80,18 +80,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          SO=target/aarch64-linux-android/fast/libhalcyon_android.so
+          SO=target/aarch64-linux-android/release/libhalcyon_android.so
           SHORT="${GITHUB_SHA::7}"
           TAG="engine-${SHORT}"
           # Much less to download: no debug info, then gzip (the launcher takes the .gz and unpacks it).
           ls -la "$SO"
           # The unstripped library, gzipped, for reading crash reports with symbols.
-          gzip -9 -c "$SO" > target/aarch64-linux-android/fast/libhalcyon_android.unstripped.so.gz
+          gzip -9 -c "$SO" > target/aarch64-linux-android/release/libhalcyon_android.unstripped.so.gz
           "$TC/llvm-strip" --strip-unneeded "$SO"
           "$TC/llvm-nm" -D "$SO" | grep -q android_main || { echo "::error::android_main is gone after strip"; exit 1; }
           gzip -9 -k -f "$SO"
           ls -la "$SO" "$SO.gz"
           gh release delete "$TAG" -y --cleanup-tag || true
-          gh release create "$TAG" "$SO" "$SO.gz" target/aarch64-linux-android/fast/libhalcyon_android.unstripped.so.gz target/aarch64-linux-android/fast/libhorizon_prepare.so target/aarch64-linux-android/fast/libhalcyon_java.so --prerelease --target "$GITHUB_SHA" \
+          gh release create "$TAG" "$SO" "$SO.gz" target/aarch64-linux-android/release/libhalcyon_android.unstripped.so.gz target/aarch64-linux-android/release/libhorizon_prepare.so target/aarch64-linux-android/release/libhalcyon_java.so --prerelease --target "$GITHUB_SHA" \
             --title "Horizon for Android (${SHORT})" \
-            --notes "libhalcyon_android.so for arm64, build profile fast, built from ${GITHUB_SHA}. The Halcyon launcher downloads this file."
+            --notes "libhalcyon_android.so for arm64, build profile release (thin LTO, one codegen unit), built from ${GITHUB_SHA}. The Halcyon launcher downloads this file."
