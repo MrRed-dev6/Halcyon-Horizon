@@ -1,6 +1,13 @@
-ls: cannot access 'target/aarch64-linux-android/fast/libhalcyon_android.so': No such file or directory
-/usr/local/lib/android/sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf: error: 'target/aarch64-linux-android/fast/libhalcyon_android.so': No such file or directory
-/usr/local/lib/android/sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf: error: 'target/aarch64-linux-android/fast/libhalcyon_android.so': No such file or directory
-/usr/local/lib/android/sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-nm: error: target/aarch64-linux-android/fast/libhalcyon_android.so: No such file or directory
+-rwxr-xr-x 2 runner runner 94363688 Nov 10 00:58 target/aarch64-linux-android/fast/libhalcyon_android.so
+  Type:                              DYN (Shared object file)
+  Machine:                           AArch64
+  0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libandroid.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libaaudio.so]
+  0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libm.so]
+  0x0000000000000001 (NEEDED)       Shared library: [libc.so]
+0000000003d28304 T GameActivity_onCreate
+00000000010d31f8 T android_main
 TLS relocations:
-/usr/local/lib/android/sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf: error: 'target/aarch64-linux-android/fast/libhalcyon_android.so': No such file or directory
+      5 R_AARCH64_TLSDESC
