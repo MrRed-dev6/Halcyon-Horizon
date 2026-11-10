@@ -8136,7 +8136,9 @@ impl Game<'_> {
     fn apply_mouse_look(&mut self) {
         let look = self.look_options();
         let time = self.started.elapsed().as_secs_f64();
-        let pointer = self.captured || self.agent_pointer;
+        // Halcyon (Android): a finger turns the view in the world (touch.rs) and there is no
+        // pointer to grab, so the touch counts as the grabbed one.
+        let pointer = self.captured || self.agent_pointer || cfg!(target_os = "android");
         let grabbed = pointer && self.screen == Screen::Playing && self.player.is_some();
         let active = self.focused || self.agent_pointer;
         if let Some((xo, yo)) = self
