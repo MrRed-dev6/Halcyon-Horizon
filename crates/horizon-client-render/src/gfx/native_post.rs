@@ -745,7 +745,7 @@ impl NativePost {
                     })],
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             });
             if let Some(e) = pollster::block_on(scope.pop()) {
                 return Err(format!("{}: {e}", stage.file));
@@ -1635,7 +1635,7 @@ file = \"b.wgsl\"
                 })],
             }),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         let mut read = |depth_of_world: f64| {
             let mut encoder = device.create_command_encoder(&Default::default());
@@ -1775,7 +1775,7 @@ file = \"b.wgsl\"
                 })],
             }),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         let group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: None,

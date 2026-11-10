@@ -7,6 +7,7 @@ rust-version = "1.85"
 description = "HDR metadata for the swapchain: the Vulkan calls the crates that forbid unsafe code can't make"
 
 [dependencies]
+log = "0.4"
 wgpu = { version = "30.0.1", default-features = false, features = ["vulkan"] }
 
 [target.'cfg(not(target_os = "macos"))'.dependencies]

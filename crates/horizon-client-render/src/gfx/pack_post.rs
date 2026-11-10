@@ -927,7 +927,7 @@ fn helper(
             targets,
         }),
         multiview_mask: None,
-        cache: None,
+        cache: horizon_hdr::pipeline_cache(),
     });
     (pipeline, layout)
 }
@@ -1703,7 +1703,7 @@ fn build_pass(
                 targets: &targets,
             }),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         (layout, pipeline)
     });
@@ -1844,7 +1844,7 @@ fn build_compute(
             module: &module,
             entry_point: Some("main"),
             compilation_options: Default::default(),
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         (layout, pipeline)
     });

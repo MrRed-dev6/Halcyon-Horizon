@@ -501,7 +501,7 @@ impl NativeMaterial {
                     },
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         };
         let blend = Some(wgpu::BlendState::ALPHA_BLENDING);

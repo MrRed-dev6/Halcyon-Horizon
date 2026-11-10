@@ -819,7 +819,7 @@ impl GpuCulling {
                 module: &module,
                 entry_point: Some(entry),
                 compilation_options: Default::default(),
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         });
         let internal = pollster::block_on(internal.pop());
@@ -2756,7 +2756,7 @@ struct Quad {
                 targets: &[Some(format.into())],
             }),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         let target = device.create_texture(&wgpu::TextureDescriptor {
             label: None,

@@ -146,7 +146,7 @@ impl Stars {
                 })],
             }),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         Self {
             pipeline,

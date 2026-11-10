@@ -134,7 +134,7 @@ impl CoreLines {
                     })],
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         };
         let lines = pipeline("Resource pack block outline", true);

@@ -293,7 +293,7 @@ fn sample(
             })],
         }),
         multiview_mask: None,
-        cache: None,
+        cache: horizon_hdr::pipeline_cache(),
     });
     let buffer = |contents: &[u8], usage| {
         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {

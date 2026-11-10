@@ -429,7 +429,7 @@ impl Translated {
             depth_stencil: None,
             multisample: Default::default(),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         self.pipelines.insert(format, pipeline);
     }
@@ -773,7 +773,7 @@ impl PostEffects {
                     depth_stencil: None,
                     multisample: Default::default(),
                     multiview_mask: None,
-                    cache: None,
+                    cache: horizon_hdr::pipeline_cache(),
                 })
             })
     }

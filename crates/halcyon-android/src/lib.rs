@@ -52,6 +52,11 @@ fn android_main(app: AndroidApp) {
     horizon_client::eventloop::set_android_app(app.clone());
     if let Some(dir) = app.internal_data_path() {
         let _ = std::env::set_current_dir(&dir);
+        // The driver's compiled pipelines are kept here between runs (horizon_hdr::pipeline_cache).
+        // SAFETY: set before the game starts any thread of its own that reads the environment.
+        unsafe {
+            std::env::set_var("HORIZON_PIPELINE_CACHE", dir.join("pipeline-cache.bin"));
+        }
         // The host app writes the command line (one argument per line) before it starts the game.
         if let Ok(text) = std::fs::read_to_string(dir.join("horizon-args.txt")) {
             let args: Vec<String> = text

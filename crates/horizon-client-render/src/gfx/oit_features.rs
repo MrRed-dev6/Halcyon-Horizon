@@ -141,7 +141,7 @@ impl Features {
                         targets: &stage_targets(stage),
                     }),
                     multiview_mask: None,
-                    cache: None,
+                    cache: horizon_hdr::pipeline_cache(),
                 })
             })
         };

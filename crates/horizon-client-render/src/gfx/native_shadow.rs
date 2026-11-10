@@ -443,7 +443,7 @@ fn entity_pipeline(
             targets: &[],
         }),
         multiview_mask: None,
-        cache: None,
+        cache: horizon_hdr::pipeline_cache(),
     })
 }
 
@@ -660,7 +660,7 @@ impl NativeShadow {
                     targets: if translucent { &color_target } else { &[] },
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         };
         let pipeline = |layout: &wgpu::PipelineLayout,

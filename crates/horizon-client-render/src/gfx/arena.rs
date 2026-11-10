@@ -1037,7 +1037,7 @@ mod tests {
                     targets: &[Some(wgpu::TextureFormat::Rgba8Unorm.into())],
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         };
         let mut flat = flat::Flat::new(&device, &terrain_layout, 4 * GRAIN, 0, pipeline);

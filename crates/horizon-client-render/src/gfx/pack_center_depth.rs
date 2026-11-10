@@ -100,7 +100,7 @@ impl CenterDepth {
                 targets: &[Some(format.into())],
             }),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         let texel = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("Shader pack centre depth"),

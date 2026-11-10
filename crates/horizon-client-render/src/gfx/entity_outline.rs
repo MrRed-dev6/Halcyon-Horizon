@@ -67,7 +67,7 @@ impl EntityOutline {
                 targets: &[Some(FORMAT.into())],
             }),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Entity outline"),
@@ -119,7 +119,7 @@ impl EntityOutline {
                     targets: &[Some(target)],
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         };
         // BlendFunction.ENTITY_OUTLINE_BLIT over the colour only (write mask 7).

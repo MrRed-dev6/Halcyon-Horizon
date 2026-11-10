@@ -298,7 +298,7 @@ fn retained_gpu_draw_matches_transient_additive_draw() {
                     })],
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         })
         .collect();
@@ -589,7 +589,7 @@ fn bolt_through_the_atlas_white_sprite_is_fully_drawn() {
             })],
         }),
         multiview_mask: None,
-        cache: None,
+        cache: horizon_hdr::pipeline_cache(),
     });
     // The game's camera: 70 degrees, reversed depth, the bolt 14 blocks ahead.
     let globals = crate::gfx::Globals {

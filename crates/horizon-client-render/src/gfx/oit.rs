@@ -299,7 +299,7 @@ impl Oit {
                     targets,
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         };
         let terrain_pipeline = |label, fragment, stage| {
@@ -468,7 +468,7 @@ impl Oit {
                     targets: &stage_targets(stage),
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         };
         let cloud_pipelines = [

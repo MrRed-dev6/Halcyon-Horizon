@@ -292,7 +292,7 @@ mod tests {
                 targets: &[Some(wgpu::TextureFormat::Rgba8Unorm.into())],
             }),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         let group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: None,

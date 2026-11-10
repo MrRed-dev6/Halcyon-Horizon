@@ -2187,7 +2187,8 @@ async fn open_backend(
                 | wgpu::Features::VERTEX_WRITABLE_STORAGE
                 | wgpu::Features::CLEAR_TEXTURE
                 | wgpu::Features::TEXTURE_ATOMIC
-                | wgpu::Features::FLOAT32_FILTERABLE));
+                | wgpu::Features::FLOAT32_FILTERABLE
+                | wgpu::Features::PIPELINE_CACHE));
     let driver = format!("{} {}", info.driver, info.driver_info);
     startup_step(format_args!(
         "requesting the device (driver {}) with features [{features}] and the adapter's \
@@ -2223,6 +2224,8 @@ async fn open_backend(
     };
     match opened {
         Ok((device, queue)) => {
+            // Halcyon (Android): the compiled pipelines are kept in a file between runs.
+            horizon_hdr::init_pipeline_cache(&device);
             let device_lost = Arc::new(std::sync::atomic::AtomicBool::new(false));
             let lost = device_lost.clone();
             device.set_device_lost_callback(move |reason, message| {
@@ -2735,7 +2738,7 @@ impl Renderer {
                     })],
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         };
         let pipeline = |label: &str,
@@ -2927,7 +2930,7 @@ impl Renderer {
                 })],
             }),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         let lines = pipeline(
             "Block outline",
@@ -3612,7 +3615,7 @@ impl Renderer {
                     })],
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         };
         let entity_pipeline = |label, cull_mode, depth_write, compare, bias, blend, clouds| {
@@ -3795,7 +3798,7 @@ impl Renderer {
                     })],
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             });
         // RenderPipelines.ENERGY_SWIRL: BlendFunction.ADDITIVE (one, one), no culling; no depth
         // writes either: vanilla sorts the quads far to near, so every face passes the test.
@@ -3895,7 +3898,7 @@ impl Renderer {
                 })],
             }),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         };
         let additive_pipeline = kept.create_render_pipeline(&additive_descriptor);
         // `RenderPipelines.DRAGON_RAYS` uses DepthStencilState.DEFAULT:
@@ -3991,7 +3994,7 @@ impl Renderer {
                 })],
             }),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         drop(entity_step);
         // WorldBorderRenderer: misc/forcefield.png as a MipmappedTexture
@@ -4161,7 +4164,7 @@ impl Renderer {
                 })],
             }),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         let screen_shader = kept.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Horizon screen effects"),
@@ -4233,7 +4236,7 @@ impl Renderer {
                     })],
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         });
         let screen_capacity = 64;

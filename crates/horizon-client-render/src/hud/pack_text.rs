@@ -207,7 +207,7 @@ impl PackText {
                 })],
             }),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         if let Some(e) = pollster::block_on(scope.pop()) {
             log::warn!("the resource pack's text shader is not used: {e}");

@@ -243,7 +243,7 @@ impl Hdr {
                     })],
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         };
         let alpha_pass = |label, blend| {
@@ -270,7 +270,7 @@ impl Hdr {
                     })],
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         };
         let clear_alpha = alpha_pass("Horizon HDR UI mask", None);

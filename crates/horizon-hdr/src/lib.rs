@@ -4,7 +4,10 @@
 //! of an scRGB swapchain.
 
 #[cfg(target_os = "linux")]
+pub mod pipeline_cache;
 pub mod wayland;
+
+pub use pipeline_cache::{init_pipeline_cache, pipeline_cache};
 
 /// Opens a Vulkan device with `VK_EXT_hdr_metadata` too, when the GPU offers
 /// it, so [`set_metadata`] can tell the compositor the real peak brightness.

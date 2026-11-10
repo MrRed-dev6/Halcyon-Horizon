@@ -82,7 +82,7 @@ struct Case { uv: vec2<f32>, stage: u32, extent: u32 }
         module: &shader,
         entry_point: Some("main"),
         compilation_options: Default::default(),
-        cache: None,
+        cache: horizon_hdr::pipeline_cache(),
     });
     // Every sprite repeats the same coordinate pattern, so moving a stage's
     // atlas origin must leave every sampled local texel unchanged.

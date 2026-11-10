@@ -131,7 +131,7 @@ fn separate_draws_match_combined_celestial_pixels() {
             })],
         }),
         multiview_mask: None,
-        cache: None,
+        cache: horizon_hdr::pipeline_cache(),
     });
     let texture = |pixels: &[u8], width, height| {
         device.create_texture_with_data(

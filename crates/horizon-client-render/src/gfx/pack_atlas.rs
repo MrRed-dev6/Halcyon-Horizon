@@ -273,7 +273,7 @@ impl PackAtlas {
                 targets: &[Some(wgpu::TextureFormat::Rgba8Unorm.into())],
             }),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         let groups = arrays
             .iter()

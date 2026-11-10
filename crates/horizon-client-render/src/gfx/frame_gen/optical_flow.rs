@@ -177,7 +177,7 @@ impl OpticalFlow {
                 module: &module,
                 entry_point: Some(entry),
                 compilation_options: Default::default(),
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         };
         let pipelines = Pipelines {

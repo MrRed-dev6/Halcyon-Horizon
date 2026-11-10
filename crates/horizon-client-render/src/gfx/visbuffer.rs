@@ -150,7 +150,7 @@ impl Visbuffer {
                     })],
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         };
         let opaque = ids("Visibility buffer opaque", "vs_vis_opaque", "fs_vis_id");
@@ -181,7 +181,7 @@ impl Visbuffer {
                 })],
             }),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         Self {
             opaque,

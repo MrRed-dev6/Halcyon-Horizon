@@ -588,7 +588,7 @@ impl Displacement {
             module: &module,
             entry_point: Some("pick"),
             compilation_options: Default::default(),
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         Self {
             distance,

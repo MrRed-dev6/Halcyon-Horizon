@@ -143,7 +143,7 @@ impl Post {
                     })],
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             })
         };
         // The OpenGL backend's GLSL translator does not support textureLoad
@@ -205,7 +205,7 @@ impl Post {
                     })],
                 }),
                 multiview_mask: None,
-                cache: None,
+                cache: horizon_hdr::pipeline_cache(),
             });
             let internal = pollster::block_on(internal.pop());
             match internal.or(pollster::block_on(validation.pop())) {

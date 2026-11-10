@@ -110,7 +110,7 @@ impl MenuBlur {
             depth_stencil: None,
             multisample: Default::default(),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         // The post chain's "bilinear": true inputs, clamped like render targets.
         let sampler = device.create_sampler(&wgpu::SamplerDescriptor {

@@ -89,7 +89,7 @@ impl EmissionStats {
                 })],
             }),
             multiview_mask: None,
-            cache: None,
+            cache: horizon_hdr::pipeline_cache(),
         });
         let params = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Horizon HDR emission threshold parameters"),
