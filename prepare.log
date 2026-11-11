@@ -1,23 +1,23 @@
-[1m[92m   Compiling[0m libc v0.2.190
 [1m[92m   Compiling[0m typenum v1.20.1
 [1m[92m   Compiling[0m generic-array v0.14.7
+[1m[92m   Compiling[0m libc v0.2.190
 [1m[92m   Compiling[0m crypto-common v0.1.7
 [1m[92m   Compiling[0m cpufeatures v0.2.17
 [1m[92m   Compiling[0m cfg-if v1.0.5
 [1m[92m   Compiling[0m digest v0.10.7
+[1m[92m   Compiling[0m regex-syntax v0.8.11
 [1m[92m   Compiling[0m zlib-rs v0.6.8
 [1m[92m   Compiling[0m hashbrown v0.17.1
-[1m[92m   Compiling[0m simd-adler32 v0.3.10
-[1m[92m   Compiling[0m regex-syntax v0.8.11
 [1m[92m   Compiling[0m block-buffer v0.10.4
-[1m[92m   Compiling[0m indexmap v2.14.2
 [1m[92m   Compiling[0m sha2 v0.10.9
+[1m[92m   Compiling[0m simd-adler32 v0.3.10
 [1m[92m   Compiling[0m horizon-prepare v0.1.0 (/home/runner/work/Halcyon-Horizon/Halcyon-Horizon/crates/horizon-prepare)
 [1m[92m   Compiling[0m zopfli v0.8.4
-[1m[92m   Compiling[0m getrandom v0.4.3
+[1m[92m   Compiling[0m indexmap v2.14.2
 [1m[92m   Compiling[0m regex-automata v0.4.18
 [1m[92m   Compiling[0m flate2 v1.1.10
+[1m[92m   Compiling[0m getrandom v0.4.3
 [1m[92m   Compiling[0m zip v9.1.3
 [1m[92m   Compiling[0m sha1 v0.10.7
 [1m[92m   Compiling[0m regex v1.13.1
-[1m[92m    Finished[0m `release` profile [optimized] target(s) in 17.36s
+[1m[92m    Finished[0m `release` profile [optimized] target(s) in 21.68s

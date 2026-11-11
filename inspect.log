@@ -1,4 +1,4 @@
--rwxr-xr-x 2 runner runner 75451504 Nov 11 04:04 target/aarch64-linux-android/release/libhalcyon_android.so
+-rwxr-xr-x 2 runner runner 75452872 Nov 11 09:41 target/aarch64-linux-android/release/libhalcyon_android.so
   Type:                              DYN (Shared object file)
   Machine:                           AArch64
   0x0000000000000001 (NEEDED)       Shared library: [libdl.so]
@@ -7,7 +7,7 @@
   0x0000000000000001 (NEEDED)       Shared library: [liblog.so]
   0x0000000000000001 (NEEDED)       Shared library: [libm.so]
   0x0000000000000001 (NEEDED)       Shared library: [libc.so]
-0000000000d9df34 T GameActivity_onCreate
-0000000000e37468 T android_main
+0000000000d9df74 T GameActivity_onCreate
+0000000000e374a8 T android_main
 TLS relocations:
       5 R_AARCH64_TLSDESC
