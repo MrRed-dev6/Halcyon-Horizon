@@ -3,8 +3,8 @@
 //! without it a compositor may clip or tone-map everything above 1.0 (80 nits)
 //! of an scRGB swapchain.
 
-#[cfg(target_os = "linux")]
 pub mod pipeline_cache;
+#[cfg(target_os = "linux")]
 pub mod wayland;
 
 pub use pipeline_cache::{init_pipeline_cache, pipeline_cache};
