@@ -17384,6 +17384,8 @@ impl ApplicationHandler for Game<'_> {
             let size = window.inner_size();
             // Items move by taps in the inventory and the creative menu: a drag there only scrolls.
             let holds = !matches!(self.screen, Screen::Inventory | Screen::Creative);
+            // A finger that was turning the view ends here now: the world must not wait for it.
+            crate::touch::reset_look();
             let pixel = crate::touch::gui_pixel(size.width, size.height);
             for mouse in crate::touch::translate(event, window.scale_factor(), pixel, holds) {
                 self.window_event(event_loop, id, mouse);

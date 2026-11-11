@@ -164,7 +164,17 @@ pub enum World {
     Look(f64, f64),
 }
 
-static LOOK: Mutex<Option<(u64, PhysicalPosition<f64>)>> = Mutex::new(None);
+/// The finger that turns the view: its id, where it last was, and when it last moved.
+static LOOK: Mutex<Option<(u64, PhysicalPosition<f64>, std::time::Instant)>> = Mutex::new(None);
+
+/// A look finger that has not moved for this long is taken to be gone (its end never came here, for
+/// example because a screen opened under it), and a new finger may take its place.
+const LOOK_STALE: std::time::Duration = std::time::Duration::from_millis(400);
+
+/// Forgets the look finger. Call it when a screen opens: the finger's end goes to that screen's touches.
+pub fn reset_look() {
+    *LOOK.lock().unwrap_or_else(|e| e.into_inner()) = None;
+}
 
 /// The hotbar slot under a finger, if it is on the hotbar (a little taller than it is drawn).
 fn hotbar_slot(position: PhysicalPosition<f64>, width: u32, height: u32) -> Option<usize> {
@@ -180,26 +190,41 @@ fn hotbar_slot(position: PhysicalPosition<f64>, width: u32, height: u32) -> Opti
 
 pub fn world(touch: &Touch, width: u32, height: u32) -> World {
     let mut look = LOOK.lock().unwrap_or_else(|e| e.into_inner());
+    // The first few, so a report shows what the camera was given.
+    static LOGGED: AtomicU32 = AtomicU32::new(0);
+    if LOGGED.fetch_add(1, Ordering::Relaxed) < 24 {
+        log::info!(
+            "Horizon touch: world {:?} id {} look {:?}",
+            touch.phase,
+            touch.id,
+            look.as_ref().map(|(id, _, _)| *id)
+        );
+    }
+    let now = std::time::Instant::now();
     match touch.phase {
         TouchPhase::Started => {
             if let Some(slot) = hotbar_slot(touch.location, width, height) {
                 return World::Hotbar(slot);
             }
-            if look.is_none() {
-                *look = Some((touch.id, touch.location));
+            let free = look
+                .as_ref()
+                .is_none_or(|(id, _, at)| *id == touch.id || now.duration_since(*at) > LOOK_STALE);
+            if free {
+                *look = Some((touch.id, touch.location, now));
             }
             World::Nothing
         }
         TouchPhase::Moved => match look.as_mut() {
-            Some((id, last)) if *id == touch.id => {
+            Some((id, last, at)) if *id == touch.id => {
                 let delta = World::Look(touch.location.x - last.x, touch.location.y - last.y);
                 *last = touch.location;
+                *at = now;
                 delta
             }
             _ => World::Nothing,
         },
         TouchPhase::Ended | TouchPhase::Cancelled => {
-            if look.as_ref().is_some_and(|(id, _)| *id == touch.id) {
+            if look.as_ref().is_some_and(|(id, _, _)| *id == touch.id) {
                 *look = None;
             }
             World::Nothing
